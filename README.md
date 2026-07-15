@@ -13,26 +13,52 @@ statische XML-Prüfung sieht. Nur ein echter Restore über Moodles eigenen
 Code-Pfad erzeugt den Stacktrace — und jeder so gefundene Fehler wird
 anschließend als statischer Check in `validate_mbz.py` der Builder verewigt.
 
-## Installation (Empfänger)
+## Herunterladen & installieren
+
+Dies ist ein **[Claude-Code-Skill](https://docs.claude.com/en/docs/claude-code)**.
+Schritt 1 (klonen) läuft überall; das Lab in Schritt 2 ist derzeit **Windows-only**
+(portable `.exe`-Binaries).
+
+**Schritt 1 — Skill an den festen Discovery-Pfad klonen**
+
+Linux / macOS (auch Windows Git-Bash):
 
 ```bash
-# 1. Skill an den festen Discovery-Pfad legen
-git clone https://github.com/Menkoban/moodle-testinstanz \
-    ~/.claude/skills/moodle-testinstanz
-
-# 2. Lab aufbauen (einmalig, ~10–20 min, ≈450 MB Download von offiziellen
-#    Quellen: windows.php.net, archive.mariadb.org, packaging.moodle.org)
-python ~/.claude/skills/moodle-testinstanz/scripts/setup_lab.py
-
-# 3. Prüfen
-python ~/.claude/skills/moodle-testinstanz/scripts/run_restore.py --health
-#    -> "Lab bereit — Moodle 4.5.x, format_tiles=True" (Exit 0)
+git clone https://github.com/Menkoban/moodle-testinstanz ~/.claude/skills/moodle-testinstanz
 ```
 
-Voraussetzungen: **Windows** (portable .exe-Binaries), Python 3.10+
-(nur Standardbibliothek!), freier Port 3307, MS Visual C++ Runtime
+Windows (PowerShell):
+
+```powershell
+git clone https://github.com/Menkoban/moodle-testinstanz "$HOME\.claude\skills\moodle-testinstanz"
+```
+
+> **Privates Repo?** Vorher anmelden: `gh auth login`, dann
+> `gh repo clone Menkoban/moodle-testinstanz <zielpfad>` (oder per SSH
+> `git clone git@github.com:Menkoban/moodle-testinstanz <zielpfad>`).
+
+**Schritt 2 — Lab aufbauen** (einmalig, ~10–20 min, ≈450 MB von offiziellen
+Quellen: windows.php.net, archive.mariadb.org, packaging.moodle.org):
+
+```bash
+python ~/.claude/skills/moodle-testinstanz/scripts/setup_lab.py          # Git-Bash
+```
+```powershell
+python "$HOME\.claude\skills\moodle-testinstanz\scripts\setup_lab.py"    # PowerShell
+```
+
+**Schritt 3 — prüfen:**
+
+```bash
+python ~/.claude/skills/moodle-testinstanz/scripts/run_restore.py --health
+#  -> "Lab bereit — Moodle 4.5.x, format_tiles=True" (Exit 0)
+```
+
+Voraussetzungen: **Windows** (portable .exe-Binaries), **Python 3.10+**
+(nur Standardbibliothek!), freier **Port 3307**, MS Visual C++ Runtime
 2015–2022 (auf normalen Systemen vorhanden). Lab-Ort: `~/.claude/moodle-lab`
-(Override: Env `MOODLE_LAB_HOME`).
+(Override: Env `MOODLE_LAB_HOME`). **Aktualisieren:**
+`git -C ~/.claude/skills/moodle-testinstanz pull`.
 
 Ab dann erkennt das Schluss-Gate (`check_delivery.py`) der Builder-Skills den
 Skill **automatisch** und führt bei jedem Kurs-Build einen echten Restore aus.
