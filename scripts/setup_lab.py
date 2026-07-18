@@ -13,7 +13,7 @@ format_tiles, so wie es `run_restore.py` erwartet:
     <lab>/_dl       heruntergeladene Zips (Rebuild-Cache)
 
 Ziel:    Env MOODLE_LAB_HOME  oder  ~/.claude/moodle-lab
-Aufruf:  python setup_lab.py [--force] [--port 3307]
+Aufruf:  python setup_lab.py [--force] [--port 3307] [--wwwport 8088]
 Dauer:   ~10–20 min (≈450 MB Download + DB-Install)
 Nur Windows (portable .exe-Binaries). Danach: run_restore.py --health → 0.
 
@@ -72,7 +72,7 @@ $CFG->dboptions = array (
   'dbcollation' => 'utf8mb4_unicode_ci',
 );
 
-$CFG->wwwroot   = 'http://localhost:8088';
+$CFG->wwwroot   = 'http://localhost:{wwwport}';
 $CFG->dataroot  = '{dataroot}';
 $CFG->admin     = 'admin';
 
@@ -161,7 +161,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Moodle-Testinstanz-Lab aufbauen")
     ap.add_argument("--force", action="store_true",
                     help="vorhandenes (Teil-)Lab weiterverwenden/ueberschreiben")
-    ap.add_argument("--port", type=int, default=3307)
+    ap.add_argument("--port", type=int, default=3307,
+                    help="MariaDB-Port (Default 3307)")
+    ap.add_argument("--wwwport", type=int, default=8088,
+                    help="Port in $CFG->wwwroot (Default 8088). Eine zweite "
+                         "Instanz neben dem Lab braucht hier einen eigenen "
+                         "Port, sonst zeigen beide config.php auf denselben.")
     args = ap.parse_args()
 
     if os.name != "nt":
@@ -238,6 +243,7 @@ def main() -> int:
     os.makedirs(dataroot, exist_ok=True)
     with open(os.path.join(moodle, "config.php"), "w", encoding="utf-8") as f:
         f.write(CONFIG_TEMPLATE.format(port=args.port,
+                                       wwwport=args.wwwport,
                                        dataroot=dataroot.replace("\\", "/")))
     marker = run([php, "-r",
                   "define('CLI_SCRIPT',1);require 'config.php';"
@@ -267,6 +273,7 @@ def main() -> int:
 
     log("FERTIG. Naechster Schritt: run_restore.py --health  (erwartet Exit 0)")
     log(f"Lab: {LAB} · Admin: admin/Admin123! · DB: 127.0.0.1:{args.port} root/root")
+    log(f"wwwroot: http://localhost:{args.wwwport}")
     return 0
 
 

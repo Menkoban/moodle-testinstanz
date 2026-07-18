@@ -87,9 +87,14 @@ run_restore.py --shutdown            # Lab-DB sauber stoppen
 
 ```bash
 cd ~/.claude/moodle-lab/moodle
-PHP_CLI_SERVER_WORKERS=8 ../php/php.exe -S localhost:8088
+../php/php.exe -S localhost:8088
 # -> http://localhost:8088 · admin / Admin123!
 ```
+
+> Der eingebaute PHP-Server ist unter Windows **strikt seriell**.
+> `PHP_CLI_SERVER_WORKERS` hilft nicht — die Variable setzt `fork()` voraus
+> und ist auf Windows wirkungslos (gemessen: 3 parallele Requests à 3 s →
+> ~9,19 s mit wie ohne). Zum Durchklicken genügt das.
 
 ## Vertrag & Architektur
 

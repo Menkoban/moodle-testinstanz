@@ -69,8 +69,14 @@ python ~/.claude/skills/moodle-testinstanz/scripts/run_restore.py "C:/…/kurs.m
 - **„Warum lehnt Moodle meinen Kurs ab?"** → Restore ohne `--json` fahren;
   bei Exit 2 steht der Stacktrace/das fehlgeschlagene SQL im `log_tail`-Block.
 - **Kurs anschauen:** mit `--keep` restaurieren, dann Webserver starten:
-  `cd <lab>/moodle && PHP_CLI_SERVER_WORKERS=8 <lab>/php/php.exe -S localhost:8088`
+  `cd <lab>/moodle && <lab>/php/php.exe -S localhost:8088`
   → `http://localhost:8088`, Login `admin` / `Admin123!`.
+  Der eingebaute Server ist auf Windows **strikt seriell** — ein hängender
+  Request blockiert die Seite. `PHP_CLI_SERVER_WORKERS` ändert daran nichts
+  (die Variable braucht `fork()` und ist unter Windows wirkungslos; gemessen:
+  3 parallele Requests à 3 s brauchen mit wie ohne sie ~9,19 s). Zum
+  Durchklicken reicht es; wer nebenläufig arbeiten will, braucht einen
+  echten Webserver.
 
 ## Das Lab (alle schweren Abhängigkeiten leben HIER)
 
