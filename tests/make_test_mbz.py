@@ -6,7 +6,19 @@
 import io, json, os, subprocess, sys, tarfile
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-SKILL = os.path.expanduser("~/.claude/skills/moodle-mbz-builder")
+
+def _find_mbz_skill():
+    candidates = [
+        os.path.normpath(os.path.join(BASE, "..", "..", "moodle-mbz-builder")),
+        os.path.expanduser("~/.gemini/config/skills/moodle-mbz-builder"),
+        os.path.expanduser("~/.claude/skills/moodle-mbz-builder"),
+    ]
+    for c in candidates:
+        if os.path.isdir(c):
+            return c
+    return candidates[0]
+
+SKILL = _find_mbz_skill()
 
 course = {
     "filename": "ok.mbz",
