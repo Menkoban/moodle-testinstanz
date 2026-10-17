@@ -3,12 +3,12 @@
 
 Laedt alle Komponenten von den OFFIZIELLEN Quellen (nichts wird aus diesem
 Repo mitgeliefert) und installiert ein lauffaehiges Moodle 4.5 mit
-format_tiles, so wie es `run_restore.py` erwartet:
+format_tiles + mod_hvp (H5P), so wie es `run_restore.py` erwartet:
 
     <lab>/php       portable PHP 8.2 (NTS x64, windows.php.net)
     <lab>/mariadb   MariaDB 10.11 (archive.mariadb.org)
     <lab>/db-data   MariaDB-Datadir (root/root, Port 3307)
-    <lab>/moodle    Moodle 4.5 (packaging.moodle.org) + format_tiles
+    <lab>/moodle    Moodle 4.5 (packaging.moodle.org) + format_tiles + mod_hvp
     <lab>/data      moodledata
     <lab>/_dl       heruntergeladene Zips (Rebuild-Cache)
 
@@ -46,6 +46,8 @@ MARIADB_VER = "10.11.9"
 MARIADB_URL = (f"https://archive.mariadb.org/mariadb-{MARIADB_VER}/"
                f"winx64-packages/mariadb-{MARIADB_VER}-winx64.zip")
 MOODLE_URL = "https://packaging.moodle.org/stable405/moodle-latest-405.zip"
+HVP_API = ("https://download.moodle.org/api/1.3/pluginfo.php"
+           "?plugin=mod_hvp&minversion=0&branch=4.5&format=json")
 TILES_API = ("https://download.moodle.org/api/1.3/pluginfo.php"
              "?plugin=format_tiles&minversion=0&branch=4.5&format=json")
 
@@ -225,7 +227,7 @@ def main() -> int:
          "DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"])
     log("MariaDB laeuft, DB 'moodle' bereit")
 
-    # 3) Moodle-Code + format_tiles ------------------------------------------
+    # 3) Moodle-Code + format_tiles + mod_hvp ------------------------------------------
     if not os.path.exists(os.path.join(moodle, "version.php")):
         extract(download(MOODLE_URL, os.path.join(DL, "moodle.zip")),
                 LAB, strip_top=False)  # Zip enthaelt bereits moodle/-Prefix
@@ -238,6 +240,18 @@ def main() -> int:
         log(f"  Version {info['pluginfo']['version']['release']}")
         extract(download(dl_url, os.path.join(DL, "format_tiles.zip")),
                 os.path.join(moodle, "course", "format"), strip_top=False)
+
+    # mod_hvp: H5P-Plugin (Activity-Ordner activities/hvp_*). Ohne es
+    # ueberspringt Moodle H5P-Aktivitaeten beim Restore stillschweigend.
+    hvp_dir = os.path.join(moodle, "mod", "hvp")
+    if not os.path.exists(os.path.join(hvp_dir, "version.php")):
+        log("frage Moodle-Plugin-API nach mod_hvp (Branch 4.5)")
+        req = urllib.request.Request(HVP_API, headers={"User-Agent": "moodle-testinstanz-setup/1.0"})
+        info = json.load(urllib.request.urlopen(req, timeout=60))
+        dl_url = info["pluginfo"]["version"]["downloadurl"]
+        log(f"  Version {info['pluginfo']['version']['release']}")
+        extract(download(dl_url, os.path.join(DL, "mod_hvp.zip")),
+                os.path.join(moodle, "mod"), strip_top=False)
 
     # 4) config.php + Datenbank-Install ---------------------------------------
     os.makedirs(dataroot, exist_ok=True)

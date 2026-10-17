@@ -24,6 +24,7 @@ Aufrufe & Exit-Codes (VERBINDLICH — daran hängt das Live-Restore-Gate):
    "restored_course_id": int|null,
    "moodle_version": "4.5.12+ (Build: 20260708)",
    "format_tiles": true|false,
+   "mod_hvp": true|false,
    "log_tail": "…letzte Restore-/Stacktrace-Zeilen…"}
 
 Verhalten: Restore ueber Moodles EIGENE CLI (admin/cli/restore_backup.php,
@@ -130,12 +131,15 @@ def php_run(code: str, timeout: float = 90.0) -> subprocess.CompletedProcess:
 
 
 def moodle_meta() -> dict | None:
-    """Billiger Moodle-CLI-Ping, liefert zugleich release + format_tiles-Bool."""
+    """Billiger Moodle-CLI-Ping, liefert zugleich release + format_tiles-/mod_hvp-Bool."""
     r = php_run(
         "define('CLI_SCRIPT',1);require 'config.php';global $DB,$CFG;"
         "$t=$DB->get_field('config_plugins','value',"
         "['plugin'=>'format_tiles','name'=>'version']);"
-        "echo '@@',json_encode(['release'=>$CFG->release,'tiles'=>(bool)$t]),'@@';"
+        "$h=$DB->get_field('config_plugins','value',"
+        "['plugin'=>'mod_hvp','name'=>'version']);"
+        "echo '@@',json_encode(['release'=>$CFG->release,'tiles'=>(bool)$t,"
+        "'hvp'=>(bool)$h]),'@@';"
     )
     m = re.search(r"@@(\{.*\})@@", r.stdout or "")
     if r.returncode != 0 or not m:
@@ -192,6 +196,7 @@ def emit(as_json: bool, status: str, course_id, meta: dict | None,
             "restored_course_id": course_id,
             "moodle_version": (meta or {}).get("release"),
             "format_tiles": (meta or {}).get("tiles", False),
+            "mod_hvp": (meta or {}).get("hvp", False),
             "log_tail": log_tail,
         }, ensure_ascii=False))
     else:
@@ -218,6 +223,7 @@ def cmd_health() -> int:
         print("LAB DOWN: Moodle-CLI antwortet nicht (config.php-Bootstrap fehlgeschlagen)")
         return EXIT_LAB_DOWN
     print(f"Lab bereit — Moodle {meta['release']}, format_tiles={meta['tiles']}, "
+          f"mod_hvp={meta.get('hvp', False)}, "
           f"DB {DB_HOST}:{DB_PORT}")
     return EXIT_OK
 

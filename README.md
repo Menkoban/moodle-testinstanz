@@ -51,7 +51,7 @@ python "$HOME\.claude\skills\moodle-testinstanz\scripts\setup_lab.py"    # Power
 
 ```bash
 python ~/.claude/skills/moodle-testinstanz/scripts/run_restore.py --health
-#  -> "Lab bereit — Moodle 4.5.x, format_tiles=True" (Exit 0)
+#  -> "Lab bereit — Moodle 4.5.x, format_tiles=True, mod_hvp=True" (Exit 0)
 ```
 
 Voraussetzungen: **Windows** (portable .exe-Binaries), **Python 3.10+**
@@ -81,7 +81,7 @@ run_restore.py --shutdown            # Lab-DB sauber stoppen
 | `3` | Lab down/fehlt (Umgebung, kein Kursfehler) | Warnung, grün |
 
 `--json` liefert ein Objekt:
-`{status, restored_course_id, moodle_version, format_tiles, log_tail}`.
+`{status, restored_course_id, moodle_version, format_tiles, mod_hvp, log_tail}`.
 
 **Kurs im Browser ansehen** (nach `--keep`):
 
@@ -121,8 +121,8 @@ muss Exit 2 mit `dmlwriteexception` im `log_tail` geben). Regenerierbar über
 ## Lizenz-Hinweis
 
 Dieses Repo enthält **nur** den Skill-Code. PHP, MariaDB, Moodle und
-format_tiles werden beim Setup von ihren offiziellen Quellen geladen und
-unterliegen ihren eigenen Lizenzen (PHP License, GPLv2, GPLv3, GPLv3).
+format_tiles, mod_hvp werden beim Setup von ihren offiziellen Quellen geladen und
+unterliegen ihren eigenen Lizenzen (PHP License, GPLv2, GPLv3, GPLv3, GPLv3).
 
 
 ## 📥 Anleitung zum Herunterladen & Installieren

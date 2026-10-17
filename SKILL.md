@@ -2,7 +2,7 @@
 name: moodle-testinstanz
 description: >-
   Restores .mbz Moodle backups into a local, portable Moodle 4.5 lab (no
-  Docker: portable PHP 8.2 + MariaDB 10.11 + format_tiles) to verify they
+  Docker: portable PHP 8.2 + MariaDB 10.11 + format_tiles + mod_hvp) to verify they
   actually restore — and to capture the REAL Moodle stack trace / failing SQL
   when they don't. Use this skill whenever the user wants to test/verify a
   Moodle backup restore locally ("restaurier mir diese .mbz", "teste die
@@ -45,7 +45,7 @@ des Live-Restore-Gates. Vertrag im Detail:
 
 ```json
 {"status": "ok|restore_failed|lab_lost", "restored_course_id": 42,
- "moodle_version": "4.5.12+ (Build: 20260708)", "format_tiles": true,
+ "moodle_version": "4.5.12+ (Build: 20260708)", "format_tiles": true, "mod_hvp": true,
  "log_tail": "…letzte Restore-Zeilen; bei Fehlern der Moodle-Stacktrace…"}
 ```
 
@@ -84,7 +84,7 @@ python ~/.claude/skills/moodle-testinstanz/scripts/run_restore.py "C:/…/kurs.m
 ~/.claude/moodle-lab/          (Override: Env MOODLE_LAB_HOME)
   php\       portable PHP 8.2 (NTS x64)
   mariadb\   MariaDB 10.11 (Port 3307, root/root, Datadir db-data\)
-  moodle\    Moodle 4.5 + format_tiles — config.php: debug=DEVELOPER an
+  moodle\    Moodle 4.5 + format_tiles + mod_hvp (H5P) — config.php: debug=DEVELOPER an
   data\      moodledata
   *.zip      Rebuild-Quellen (php/mariadb/moodle/tiles)
 ```
